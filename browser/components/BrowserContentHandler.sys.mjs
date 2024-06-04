@@ -342,12 +342,21 @@ function openBrowserWindow(
     });
     args = array;
   }
-
-  return lazy.BrowserWindowTracker.openWindow({
-    args,
-    features: gBrowserContentHandler.getFeatures(cmdLine),
-    private: forcePrivate,
-  });
+  let needSsbOpenWindow = Services.prefs.prefHasUserValue("browser.ssb.startup");
+  if (!needSsbOpenWindow) {
+    return lazy.BrowserWindowTracker.openWindow({
+      args,
+      features: gBrowserContentHandler.getFeatures(cmdLine),
+      private: forcePrivate,
+    });
+  } else {
+    var { SiteSpecificBrowserIdUtils } = ChromeUtils.importESModule(
+      "chrome://floorp/content/modules/ssb/SiteSpecificBrowserIdUtils.mjs"
+    );
+    let id = Services.prefs.getStringPref("browser.ssb.startup");
+    SiteSpecificBrowserIdUtils.runSsbById(id);
+    Services.prefs.clearUserPref("browser.ssb.startup");
+  }
 }
 
 function openPreferences(cmdLine, extraArgs) {
@@ -400,6 +409,13 @@ nsBrowserContentHandler.prototype = {
 
   /* nsICommandLineHandler */
   handle: function bch_handle(cmdLine) {
+    let id = cmdLine.handleFlagWithParam("start-ssb", true);
+    if (id) {
+      Services.prefs.setCharPref("browser.ssb.startup", id);
+      console.log("get rekt");
+      console.log(id);
+      return;
+    }
     if (cmdLine.handleFlag("kiosk", false)) {
       gKiosk = true;
     }

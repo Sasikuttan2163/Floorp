@@ -2390,6 +2390,7 @@ var gBrowserInit = {
       //                      window (for this case, all other arguments are
       //                      ignored).
       let uri = window.arguments?.[0];
+      console.log("got uri", uri);
 
       /*** Floorp Injections *********************************************************************************************/
       if (uri) {
@@ -2454,6 +2455,7 @@ var gBrowserInit = {
       });
 
       const SsbPrefName = "browser.ssb.startup";
+      console.log("same load")
       let needSsbOpenWindow = Services.prefs.prefHasUserValue(SsbPrefName);
       if (needSsbOpenWindow) {
         let id = Services.prefs.getStringPref(SsbPrefName);
